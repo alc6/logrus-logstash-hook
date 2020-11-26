@@ -36,7 +36,7 @@ This is how it will look like:
 
 ```ruby
 {
-    "@timestamp" => "2016-02-29T16:57:23.000Z",
+    "@timestamp" => "2016-02-29T16:57:23.456Z",
       "@version" => "1",
          "level" => "info",
        "message" => "Hello World!",
