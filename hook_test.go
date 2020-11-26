@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"strings"
 	"testing"
 	"time"
@@ -29,21 +31,15 @@ func TestFire(t *testing.T) {
 		Data:    logrus.Fields{},
 	}
 
-	err := h.Fire(entry)
-	if err != nil {
-		t.Error("expected Fire to not return error")
-	}
+	require.NoError(t, h.Fire(entry))
 
-	expected := "msg: \"my message\""
-	if buffer.String() != expected {
-		t.Errorf("expected to see '%s' in '%s'", expected, buffer.String())
-	}
+	assert.Equal(t, "msg: \"my message\"", buffer.String())
 }
 
 type FailFmt struct{}
 
 func (f FailFmt) Format(e *logrus.Entry) ([]byte, error) {
-	return nil, errors.New("")
+	return nil, errors.New("fail format")
 }
 
 func TestFireFormatError(t *testing.T) {
@@ -53,9 +49,7 @@ func TestFireFormatError(t *testing.T) {
 		formatter: FailFmt{},
 	}
 
-	if err := h.Fire(&logrus.Entry{Data: logrus.Fields{}}); err == nil {
-		t.Error("expected Fire to return error")
-	}
+	assert.Error(t, errors.New("fail format"), h.Fire(&logrus.Entry{Data: logrus.Fields{}}))
 }
 
 type FailWrite struct{}
