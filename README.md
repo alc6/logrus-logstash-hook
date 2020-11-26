@@ -1,6 +1,9 @@
 # Logstash hook for logrus <img src="http://i.imgur.com/hTeVwmJ.png" width="40" height="40" alt=":walrus:" class="emoji" title=":walrus:" />
-[![Build Status](https://travis-ci.org/bshuster-repo/logrus-logstash-hook.svg?branch=master)](https://travis-ci.org/bshuster-repo/logrus-logstash-hook)
-[![Go Report Status](https://goreportcard.com/badge/github.com/bshuster-repo/logrus-logstash-hook)](https://goreportcard.com/report/github.com/bshuster-repo/logrus-logstash-hook)
+This repository is a fork of https://github.com/bshuster-repo/logrus-logstash-hook, with opinionated changes related to logrus/logstash.
+
+Basically, you might be interested in this fork if you're likely to use logrus with the Report Caller, and if you want a ns precision on the logs sent to logstash.
+
+All the credit of the work is given to Boaz Shuster.
 
 Use this hook to send the logs to [Logstash](https://www.elastic.co/products/logstash).
 
@@ -55,4 +58,4 @@ Boaz Shuster | ripcurld0 | @ripcurld0 |
 
 # License
 
-MIT.
+Boaz Shuster/MIT.
