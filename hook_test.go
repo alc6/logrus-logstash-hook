@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"strings"
 	"testing"
 	"time"
@@ -29,21 +31,17 @@ func TestFire(t *testing.T) {
 		Data:    logrus.Fields{},
 	}
 
-	err := h.Fire(entry)
-	if err != nil {
-		t.Error("expected Fire to not return error")
-	}
+	require.NoError(t, h.Fire(entry))
 
-	expected := "msg: \"my message\""
-	if buffer.String() != expected {
-		t.Errorf("expected to see '%s' in '%s'", expected, buffer.String())
-	}
+	assert.Equal(t, "msg: \"my message\"", buffer.String())
 }
 
 type FailFmt struct{}
 
+var errorFailFmt = errors.New("fail format")
+
 func (f FailFmt) Format(e *logrus.Entry) ([]byte, error) {
-	return nil, errors.New("")
+	return nil, errorFailFmt
 }
 
 func TestFireFormatError(t *testing.T) {
@@ -53,15 +51,15 @@ func TestFireFormatError(t *testing.T) {
 		formatter: FailFmt{},
 	}
 
-	if err := h.Fire(&logrus.Entry{Data: logrus.Fields{}}); err == nil {
-		t.Error("expected Fire to return error")
-	}
+	assert.Error(t, errorFailFmt, h.Fire(&logrus.Entry{Data: logrus.Fields{}}))
 }
 
 type FailWrite struct{}
 
+var errorFailWrite = errors.New("fail write")
+
 func (w FailWrite) Write(d []byte) (int, error) {
-	return 0, errors.New("")
+	return 0, errorFailWrite
 }
 
 func TestFireWriteError(t *testing.T) {
@@ -70,9 +68,7 @@ func TestFireWriteError(t *testing.T) {
 		formatter: &logrus.JSONFormatter{},
 	}
 
-	if err := h.Fire(&logrus.Entry{Data: logrus.Fields{}}); err == nil {
-		t.Error("expected Fire to return error")
-	}
+	assert.Equal(t, errorFailWrite, h.Fire(&logrus.Entry{Data: logrus.Fields{}}))
 }
 
 func TestDefaultFormatterWithFields(t *testing.T) {
@@ -84,9 +80,7 @@ func TestDefaultFormatterWithFields(t *testing.T) {
 	}
 
 	res, err := format.Format(entry)
-	if err != nil {
-		t.Errorf("expected format to not return error: %s", err)
-	}
+	require.NoError(t, err)
 
 	expected := []string{
 		"f1\":\"bla\"",
@@ -95,9 +89,7 @@ func TestDefaultFormatterWithFields(t *testing.T) {
 	}
 
 	for _, exp := range expected {
-		if !strings.Contains(string(res), exp) {
-			t.Errorf("expected to have '%s' in '%s'", exp, string(res))
-		}
+		assert.True(t, strings.Contains(string(res), exp))
 	}
 }
 
@@ -115,9 +107,7 @@ func TestDefaultFormatterWithEmptyFields(t *testing.T) {
 	}
 
 	res, err := formatter.Format(entry)
-	if err != nil {
-		t.Errorf("expected Format not to return error: %s", err)
-	}
+	require.NoError(t, err)
 
 	expected := []string{
 		"\"message\":\"message bla bla\"",
@@ -125,20 +115,16 @@ func TestDefaultFormatterWithEmptyFields(t *testing.T) {
 		"\"Key1\":\"Value1\"",
 		"\"@version\":\"1\"",
 		"\"type\":\"log\"",
-		fmt.Sprintf("\"@timestamp\":\"%s\"", now.Format(time.RFC3339)),
+		fmt.Sprintf("\"@timestamp\":\"%s\"", now.Format(time.RFC3339Nano)),
 	}
 
 	for _, exp := range expected {
-		if !strings.Contains(string(res), exp) {
-			t.Errorf("expected to have '%s' in '%s'", exp, string(res))
-		}
+		assert.True(t, strings.Contains(string(res), exp))
 	}
 }
 
 func TestLogstashFieldsNotOverridden(t *testing.T) {
 	_ = DefaultFormatter(logrus.Fields{"user1": "11"})
 
-	if _, ok := logstashFields["user1"]; ok {
-		t.Errorf("expected user1 to not be in logstashFields: %#v", logstashFields)
-	}
+	assert.NotContains(t, logstashFields, "user1")
 }

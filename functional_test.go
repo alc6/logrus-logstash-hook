@@ -3,6 +3,7 @@ package logrustash_test
 import (
 	"bytes"
 	"fmt"
+	"github.com/stretchr/testify/require"
 	"net"
 	"strings"
 	"testing"
@@ -143,10 +144,10 @@ func TestDefaultFormatterLogstashFields(t *testing.T) {
 func TestUDPWritter(t *testing.T) {
 	log := logrus.New()
 	conn, err := net.Dial("udp", ":8282")
-	if err != nil {
-		t.Errorf("expected Dial to not return error: %s", err)
-	}
+	require.NoError(t, err)
+
 	hook := logrustash.New(conn, &logrus.JSONFormatter{})
+	require.NotNil(t, hook)
 	log.Hooks.Add(hook)
 
 	log.Info("this is an information message")
