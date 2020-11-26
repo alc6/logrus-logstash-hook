@@ -38,8 +38,10 @@ func TestFire(t *testing.T) {
 
 type FailFmt struct{}
 
+var errorFailFmt = errors.New("fail format")
+
 func (f FailFmt) Format(e *logrus.Entry) ([]byte, error) {
-	return nil, errors.New("fail format")
+	return nil, errorFailFmt
 }
 
 func TestFireFormatError(t *testing.T) {
@@ -49,13 +51,16 @@ func TestFireFormatError(t *testing.T) {
 		formatter: FailFmt{},
 	}
 
-	assert.Error(t, errors.New("fail format"), h.Fire(&logrus.Entry{Data: logrus.Fields{}}))
+	assert.Error(t, errorFailFmt, h.Fire(&logrus.Entry{Data: logrus.Fields{}}))
 }
 
 type FailWrite struct{}
 
+var errorFailWrite = errors.New("fail write")
+
+
 func (w FailWrite) Write(d []byte) (int, error) {
-	return 0, errors.New("")
+	return 0, errorFailFmt
 }
 
 func TestFireWriteError(t *testing.T) {
@@ -64,9 +69,7 @@ func TestFireWriteError(t *testing.T) {
 		formatter: &logrus.JSONFormatter{},
 	}
 
-	if err := h.Fire(&logrus.Entry{Data: logrus.Fields{}}); err == nil {
-		t.Error("expected Fire to return error")
-	}
+	assert.Equal(t, errorFailFmt, h.Fire(&logrus.Entry{Data: logrus.Fields{}}))
 }
 
 func TestDefaultFormatterWithFields(t *testing.T) {
@@ -78,9 +81,7 @@ func TestDefaultFormatterWithFields(t *testing.T) {
 	}
 
 	res, err := format.Format(entry)
-	if err != nil {
-		t.Errorf("expected format to not return error: %s", err)
-	}
+	require.NoError(t, err)
 
 	expected := []string{
 		"f1\":\"bla\"",
@@ -89,9 +90,7 @@ func TestDefaultFormatterWithFields(t *testing.T) {
 	}
 
 	for _, exp := range expected {
-		if !strings.Contains(string(res), exp) {
-			t.Errorf("expected to have '%s' in '%s'", exp, string(res))
-		}
+		assert.True(t, strings.Contains(string(res), exp))
 	}
 }
 
@@ -109,9 +108,7 @@ func TestDefaultFormatterWithEmptyFields(t *testing.T) {
 	}
 
 	res, err := formatter.Format(entry)
-	if err != nil {
-		t.Errorf("expected Format not to return error: %s", err)
-	}
+	require.NoError(t, err)
 
 	expected := []string{
 		"\"message\":\"message bla bla\"",
@@ -123,16 +120,12 @@ func TestDefaultFormatterWithEmptyFields(t *testing.T) {
 	}
 
 	for _, exp := range expected {
-		if !strings.Contains(string(res), exp) {
-			t.Errorf("expected to have '%s' in '%s'", exp, string(res))
-		}
+		assert.True(t, strings.Contains(string(res), exp))
 	}
 }
 
 func TestLogstashFieldsNotOverridden(t *testing.T) {
 	_ = DefaultFormatter(logrus.Fields{"user1": "11"})
 
-	if _, ok := logstashFields["user1"]; ok {
-		t.Errorf("expected user1 to not be in logstashFields: %#v", logstashFields)
-	}
+	assert.NotContains(t, logstashFields, "user1")
 }
