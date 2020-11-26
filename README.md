@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.com/alc6/logrus-logstash-hook.svg?branch=master)](https://travis-ci.com/alc6/logrus-logstash-hook)
+[![Go Report Card](https://goreportcard.com/badge/github.com/alc6/logrus-logstash-hook)](https://goreportcard.com/report/github.com/alc6/logrus-logstash-hook)
+
 # Logstash hook for logrus <img src="http://i.imgur.com/hTeVwmJ.png" width="40" height="40" alt=":walrus:" class="emoji" title=":walrus:" />
 This repository is a fork of https://github.com/bshuster-repo/logrus-logstash-hook, with opinionated changes related to logrus/logstash.
 
