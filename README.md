@@ -50,6 +50,23 @@ This is how it will look like:
 }
 ```
 
+This is how it will look like with report caller enabled:
+
+```ruby
+{
+    "@timestamp" => "2016-02-29T16:57:23.456Z",
+      "@version" => "1",
+         "level" => "info",
+       "message" => "Hello World!",
+        "method" => "main",
+          "host" => "172.17.0.1",
+          "port" => 45199,
+          "type" => "myappName"
+          "file" => "github.com/user/project/main.go:10"
+          "func" => "github.com/user/project/moduleMain.Func
+}
+```
+
 # Maintainers
 
 Name         | Github    | Twitter    |
