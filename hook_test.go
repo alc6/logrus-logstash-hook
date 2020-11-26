@@ -58,9 +58,8 @@ type FailWrite struct{}
 
 var errorFailWrite = errors.New("fail write")
 
-
 func (w FailWrite) Write(d []byte) (int, error) {
-	return 0, errorFailFmt
+	return 0, errorFailWrite
 }
 
 func TestFireWriteError(t *testing.T) {
@@ -69,7 +68,7 @@ func TestFireWriteError(t *testing.T) {
 		formatter: &logrus.JSONFormatter{},
 	}
 
-	assert.Equal(t, errorFailFmt, h.Fire(&logrus.Entry{Data: logrus.Fields{}}))
+	assert.Equal(t, errorFailWrite, h.Fire(&logrus.Entry{Data: logrus.Fields{}}))
 }
 
 func TestDefaultFormatterWithFields(t *testing.T) {
